@@ -27,7 +27,7 @@ export default function Home() {
       setTotalRequests(new Map(Object.entries(data.totalRequests || {})));
       setStartTimes(new Map(Object.entries(data.startTimes || {})));
       setActive(new Map(Object.entries(data.active || {})));
-    } catch (e) {
+    } catch {
       // Có thể show toast lỗi ở đây
     }
     setLoading(false);

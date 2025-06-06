@@ -1,31 +1,39 @@
 const API_URL = '/api/urls';
 
 export async function startInterval(url: string) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ url, action: 'start' }),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to start URL: ${response.statusText}`);
+  try {
+    const response = await fetch('/api/urls', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, action: 'start' })
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    // Chỉ cần đảm bảo response được xử lý
+    await response.json();
+  } catch (error) {
+    console.error('Error starting interval:', error);
+    throw error;
   }
-  return response.json();
 }
 
 export async function stopInterval(url: string) {
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ url, action: 'stop' }),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to stop URL: ${response.statusText}`);
+  try {
+    const response = await fetch('/api/urls', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url, action: 'stop' })
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    // Chỉ cần đảm bảo response được xử lý
+    await response.json();
+  } catch (error) {
+    console.error('Error stopping interval:', error);
+    throw error;
   }
-  return response.json();
 }
 
 export async function deleteUrl(url: string) {
@@ -100,7 +108,7 @@ export function saveToBackend(url: string, active: boolean) {
       body: JSON.stringify({ url }),
     })
       .then(response => response.json())
-      .then(data => console.log(`Saved ${url} to backend as active`))
+      .then(() => console.log(`Saved ${url} to backend as active`))
       .catch(error => console.error('Error saving to backend:', error));
   } else {
     fetch(API_URL, {
@@ -111,7 +119,7 @@ export function saveToBackend(url: string, active: boolean) {
       body: JSON.stringify({ url, action: 'stop' }),
     })
       .then(response => response.json())
-      .then(data => console.log(`Saved ${url} to backend as inactive`))
+      .then(() => console.log(`Saved ${url} to backend as inactive`))
       .catch(error => console.error('Error saving to backend:', error));
   }
 }
