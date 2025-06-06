@@ -1,29 +1,81 @@
 const API_URL = '/api/urls';
 
-export function startInterval(url: string) {
-  fetch(API_URL, {
+export async function startInterval(url: string) {
+  const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ url, action: 'start' }),
-  })
-    .then(response => response.json())
-    .then(data => console.log(`Started interval for ${url} on server`))
-    .catch(error => console.error('Error starting interval on server:', error));
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to start URL: ${response.statusText}`);
+  }
+  return response.json();
 }
 
-export function stopInterval(url: string) {
-  fetch(API_URL, {
+export async function stopInterval(url: string) {
+  const response = await fetch(API_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ url, action: 'stop' }),
-  })
-    .then(response => response.json())
-    .then(data => console.log(`Stopped interval for ${url} on server`))
-    .catch(error => console.error('Error stopping interval on server:', error));
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to stop URL: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function deleteUrl(url: string) {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url, action: 'delete' }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to delete URL: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function loadFromBackend() {
+  const response = await fetch(API_URL);
+  if (!response.ok) {
+    throw new Error('Failed to load data from backend');
+  }
+  return response.json();
+}
+
+export async function addUrl(url: string) {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url, action: 'add' }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to add URL: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+export async function updateCounter(url: string) {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url, action: 'counter' }),
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to update counter: ${response.statusText}`);
+  }
+  return response.json();
 }
 
 export function getIntervals() {
@@ -36,15 +88,6 @@ export function getCounters() {
 
 export function getStartTimes() {
   return new Map(); 
-}
-
-export function loadFromBackend(setUrls: (urls: string[]) => void) {
-  fetch(API_URL)
-    .then(response => response.json())
-    .then(data => {
-      setUrls(data.urls || []);
-    })
-    .catch(error => console.error('Error loading data from backend:', error));
 }
 
 export function saveToBackend(url: string, active: boolean) {
@@ -71,17 +114,4 @@ export function saveToBackend(url: string, active: boolean) {
       .then(data => console.log(`Saved ${url} to backend as inactive`))
       .catch(error => console.error('Error saving to backend:', error));
   }
-}
-
-export function updateCounter(url: string) {
-  fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ url, action: 'counter' }),
-  })
-    .then(response => response.json())
-    .then(data => console.log(`Updated counter for ${url}`))
-    .catch(error => console.error('Error updating counter:', error));
 }
