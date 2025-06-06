@@ -1,103 +1,132 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { loadFromBackend, startInterval, stopInterval } from '@/lib/intervalManager';
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [urls, setUrls] = useState<string[]>([]);
+  const [counters, setCounters] = useState<Map<string, number>>(new Map());
+  const [startTimes, setStartTimes] = useState<Map<string, number>>(new Map());
+  const [active, setActive] = useState<Map<string, boolean>>(new Map());
+  const [newUrl, setNewUrl] = useState('');
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const fetchData = () => {
+    loadFromBackend((data: any) => {
+      setUrls(data.urls || []);
+      setCounters(new Map(Object.entries(data.counters || {})));
+      setStartTimes(new Map(Object.entries(data.startTimes || {})));
+      setActive(new Map(Object.entries(data.active || {})));
+    });
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const addUrl = () => {
+    if (newUrl && !urls.includes(newUrl)) {
+      startInterval(newUrl);
+      fetchData();
+      setNewUrl('');
+    }
+  };
+
+  const handleStart = (url: string) => {
+    startInterval(url);
+    fetchData();
+  };
+
+  const handleStop = (url: string) => {
+    stopInterval(url);
+    fetchData();
+  };
+
+  const handleDelete = (url: string) => {
+    stopInterval(url);
+    fetchData();
+  };
+
+  const formatTime = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString();
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+      <h1 className="text-3xl font-bold mb-6">Keep Alive App</h1>
+      <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4">Add New URL</h2>
+        <div className="flex gap-4">
+          <input
+            type="text"
+            value={newUrl}
+            onChange={(e) => setNewUrl(e.target.value)}
+            placeholder="Enter URL"
+            className="flex-1 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={addUrl}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            Add & Start
+          </button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+      <div className="w-full max-w-4xl bg-white rounded-lg shadow-md p-6">
+        <h2 className="text-xl font-semibold mb-4">URL Management</h2>
+        {urls.length === 0 ? (
+          <p className="text-gray-500">No URLs added yet.</p>
+        ) : (
+          <table className="w-full border-collapse border border-gray-300">
+            <thead>
+              <tr>
+                <th className="border p-2 text-left">URL</th>
+                <th className="border p-2 text-left">Status</th>
+                <th className="border p-2 text-left">Run Count</th>
+                <th className="border p-2 text-left">Start Time</th>
+                <th className="border p-2 text-left">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {urls.map((url) => {
+                const isRunning = active.get(url);
+                const startTime = startTimes.get(url);
+                const runCount = counters.get(url) || 0;
+                return (
+                  <tr key={url} className="border-b">
+                    <td className="p-2 border">{url}</td>
+                    <td className="p-2 border">{isRunning ? 'Running' : 'Stopped'}</td>
+                    <td className="p-2 border">{runCount}</td>
+                    <td className="p-2 border">{startTime ? formatTime(startTime) : 'N/A'}</td>
+                    <td className="p-2 border flex gap-2">
+                      <button
+                        onClick={() => handleStart(url)}
+                        disabled={isRunning}
+                        className={`px-2 py-1 rounded-md text-white ${isRunning ? 'bg-gray-400' : 'bg-green-500 hover:bg-green-600'}`}
+                      >
+                        Start
+                      </button>
+                      <button
+                        onClick={() => handleStop(url)}
+                        disabled={!isRunning}
+                        className={`px-2 py-1 rounded-md text-white ${!isRunning ? 'bg-gray-400' : 'bg-red-500 hover:bg-red-600'}`}
+                      >
+                        Stop
+                      </button>
+                      <button
+                        onClick={() => handleDelete(url)}
+                        className="px-2 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 }

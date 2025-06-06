@@ -1,0 +1,18 @@
+{
+  "urls": [
+    "https://massage-home24h-api.onrender.com/api",
+    "google.com"
+  ],
+  "counters": {
+    "https://massage-home24h-api.onrender.com/api": 281,
+    "google.com": 0
+  },
+  "startTimes": {
+    "https://massage-home24h-api.onrender.com/api": 1749181169894,
+    "google.com": 1749182174260
+  },
+  "active": {
+    "https://massage-home24h-api.onrender.com/api": true,
+    "google.com": false
+  }
+}
